@@ -17,7 +17,7 @@
     "eofline": true,
     "forin": true,
     "import-blacklist": [
-      true,
+      true
     ],
     "import-spacing": true,
     "indent": [
@@ -119,13 +119,13 @@
     "directive-selector": [
       true,
       "attribute",
-      "kaf",
+      "",
       "camelCase"
     ],
     "component-selector": [
       true,
       "element",
-      "kaf",
+      "",
       "kebab-case"
     ],
     "no-output-on-prefix": true,

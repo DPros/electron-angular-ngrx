@@ -135,11 +135,11 @@
   "defaultProject": "electron-angular-ngrx",
   "schematics": {
     "@ngrx/schematics:component": {
-      "prefix": "kaf",
+      "prefix": "app",
       "styleext": "scss"
     },
     "@ngrx/schematics:directive": {
-      "prefix": "kaf"
+      "prefix": "app"
     }
   }
 }

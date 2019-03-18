@@ -58,9 +58,10 @@
     "core-js": "^2.4.1",
     "font-awesome": "^4.7.0",
     "ng2-split-pane": "^1.4.0",
+    "ng5-slider": "^1.1.13",
     "ngx-electron": "^1.0.4",
     "rx-ipc-electron": "^0.1.2",
-    "rxjs": "^6.2.2",
+    "rxjs": "^6.3.3",
     "zone.js": "^0.8.26"
   },
   "devDependencies": {

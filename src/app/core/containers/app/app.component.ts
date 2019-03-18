@@ -13,8 +13,8 @@ export class AppComponent {
 
   public routeList: NavItem[] = [
     {
-      label: 'Home',
-      routerLink: './'
+      label: 'Criterion',
+      routerLink: './criterion'
     },
     {
       label: 'People',
