@@ -1,6 +1,6 @@
 import {Injectable} from '@angular/core';
 import {AhmStore} from './ahm-store.service';
-import {map, pluck, shareReplay, switchMap} from 'rxjs/operators';
+import {filter, map, pluck, shareReplay, switchMap} from 'rxjs/operators';
 import {Observable} from 'rxjs';
 import {SimpleMap} from '../models/simple-map';
 import {log} from '../utils/utils';
@@ -34,9 +34,15 @@ export class AhmCalculationUtils {
           .map(([name, pairwiseRelevance]) => pairwiseRelevance(name) / sums[name]),
           1 / sums[criteriaName]
         ]),
+        filter(divisions => divisions.every(_ => !isNaN(_))),
         log('divisions divided'),
-        map((divisions: number[]) => divisions
-          .reduce((acc, v) => acc + v, 0) / Object.keys(relevanceMap).length + 1)
+        map((divisions: number[]) => {
+          const a = divisions
+            .reduce((acc, v) => acc + v, 0);
+          const b = Object.keys(relevanceMap).length + 1;
+          console.log(a + ' ' + b);
+          return a / b;
+        })
         )
       )
     );

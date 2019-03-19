@@ -1,0 +1,60 @@
+<div>
+  <ng-container *ngFor="let criteria of _criterion | async"
+                [ngTemplateOutlet]="criteriaButton"
+                [ngTemplateOutletContext]="{criteria: criteria,selected: _selectedCriteria}"
+  ></ng-container>
+</div>
+
+<ng-container [ngSwitch]="_selectedCriteria.length">
+  <ng-container *ngSwitchCase="2"
+                [ngTemplateOutlet]="criteriaRelevance"
+                [ngTemplateOutletContext]="{a: _selectedCriteria[0], b: _selectedCriteria[1]}"
+  ></ng-container>
+  <ng-container *ngSwitchCase="1">
+    <ng-container *ngFor="let criteria of _criterion | async">
+      <ng-container *ngIf="criteria != _selectedCriteria[0]"
+                    [ngTemplateOutlet]="criteriaRelevance"
+                    [ngTemplateOutletContext]="{a: _selectedCriteria[0], b: criteria}"
+      ></ng-container>
+    </ng-container>
+  </ng-container>
+</ng-container>
+
+<form [formGroup]="_criteriaForm" (ngSubmit)="onSubmit()">
+  <input matInput placeholder="Name" formControlName="name">
+  <button type="submit" mat-raised-button>Submit</button>
+</form>
+
+<ng-template #criteriaButton
+             let-criteria="criteria"
+             let-selected="selected"
+>
+  <ng-container [ngSwitch]="selected.includes(criteria)">
+    <button *ngSwitchCase="true"
+            mat-flat-button
+            (click)="deselect(criteria)"
+    >
+      {{criteria.name}} ({{getTotalRelevance(criteria.name) | async}})
+    </button>
+    <button *ngSwitchCase="false"
+            mat-raised-button
+            (click)="select(criteria)"
+    >
+      {{criteria.name}} ({{getTotalRelevance(criteria.name) | async}})
+    </button>
+  </ng-container>
+</ng-template>
+
+<ng-template #criteriaRelevance
+             let-a="a"
+             let-b="b"
+>
+  <div style="display: flex">
+    {{a.name}}
+    <ng5-slider [value]="getRelevance(a,b) | async"
+                [options]="getSliderOptions(a,b)"
+                (valueChange)="changeRelevance(a,b,$event)"
+    ></ng5-slider>
+    {{b.name}}
+  </div>
+</ng-template>
