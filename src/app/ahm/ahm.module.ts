@@ -11,6 +11,8 @@ import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AhmStore} from './services/ahm-store.service';
 import {AhmCalculationUtils} from './services/ahm-calculation.utils';
 import {Ng5SliderModule} from 'ng5-slider';
+import {GenericListComponent} from './views/generic-list/generic-list.component';
+import {OptionsListComponent} from './views/options-list/options-list.component';
 
 @NgModule({
   imports: [
@@ -18,7 +20,8 @@ import {Ng5SliderModule} from 'ng5-slider';
     CommonModule,
     RouterModule.forChild([
       {path: 'criterion', component: CriterionListComponent},
-      {path: '', redirectTo: 'criterion', pathMatch: 'full'}
+      {path: 'options', component: OptionsListComponent},
+      {path: '', redirectTo: 'options', pathMatch: 'full'}
     ]),
     Ng5SliderModule,
     FormsModule,
@@ -26,7 +29,11 @@ import {Ng5SliderModule} from 'ng5-slider';
     StoreModule.forFeature('ahm', ahmReducer),
     EffectsModule.forFeature([AhmEffects]),
   ],
-  declarations: [CriterionListComponent],
+  declarations: [
+    CriterionListComponent,
+    GenericListComponent,
+    OptionsListComponent
+  ],
   providers: [
     AhmStore,
     AhmCalculationUtils

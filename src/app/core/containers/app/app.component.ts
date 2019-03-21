@@ -17,8 +17,8 @@ export class AppComponent {
       routerLink: './criterion'
     },
     {
-      label: 'People',
-      routerLink: './people'
+      label: 'Options',
+      routerLink: './options'
     },
     {
       label: 'About',

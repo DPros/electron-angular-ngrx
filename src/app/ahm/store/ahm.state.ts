@@ -1,14 +1,18 @@
 import {Criteria} from '../models/criteria';
-import {SimpleMap} from '../models/simple-map';
-import {PairwiseRelevance} from '../models/pairwise-relevance';
+import {RelevanceMap} from '../models/relevance-map';
+import {Option} from '../models/option';
 
 export interface AhmState {
   criterion: Criteria[];
-  criterionRelevance: SimpleMap<PairwiseRelevance>;
+  criterionRelevance: Record<string, RelevanceMap>;
+  options: Option[];
+  optionsRelevances: Record<string, Record<string, RelevanceMap>>;
 }
 
 export const initialAhmState: AhmState = {
   criterion: [],
-  criterionRelevance: {}
+  options: [],
+  criterionRelevance: {},
+  optionsRelevances: {}
 };
 

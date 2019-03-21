@@ -1,0 +1,12 @@
+<button *ngFor="let criteria of _criterion$ | async"
+        [class._selected]="criteria === _selectedCriteria"
+        (click)="onCriteriaClick(criteria)"
+>
+  {{criteria.name}}
+</button>
+<generic-list [items$]="_options$"
+              [relevances$]="_relevances$"
+              [scores$]="_scores$"
+              (addItem)="addOption($event)"
+              (relevanceChange)="changeRelevance($event)"
+></generic-list>

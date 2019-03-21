@@ -1,0 +1,59 @@
+<div style="display: flex">
+  <ng-container *ngFor="let item of (items$ | async)"
+                [ngTemplateOutlet]="itemButton"
+                [ngTemplateOutletContext]="{item: item,selected: _selectedItems}"
+  ></ng-container>
+  <table>
+    <tr *ngFor="let score of (ranking$ | async)">
+      <td>{{score[0]}}</td>
+      <td>{{score[1]}}</td>
+    </tr>
+  </table>
+</div>
+
+<ng-container *ngIf="relevances$"
+              [ngSwitch]="_selectedItems.length"
+>
+  <ng-container *ngSwitchCase="2"
+                [ngTemplateOutlet]="relevance"
+                [ngTemplateOutletContext]="{a: _selectedItems[0], b: _selectedItems[1]}"
+  ></ng-container>
+  <ng-container *ngSwitchCase="1">
+    <ng-container *ngFor="let item of (items$ | async)">
+      <ng-container *ngIf="item !== _selectedItems[0]"
+                    [ngTemplateOutlet]="relevance"
+                    [ngTemplateOutletContext]="{a: _selectedItems[0], b: item}"
+      ></ng-container>
+    </ng-container>
+  </ng-container>
+</ng-container>
+
+<form [formGroup]="_form" (ngSubmit)="onSubmit()">
+  <input placeholder="Name" formControlName="name">
+  <button type="submit">Submit</button>
+</form>
+
+<ng-template #itemButton
+             let-item="item"
+             let-selected="selected"
+>
+  <button [class._selected]="selected.includes(item)"
+          (click)="itemClick(item)"
+  >
+    {{item.name}}
+  </button>
+</ng-template>
+
+<ng-template #relevance
+             let-a="a"
+             let-b="b"
+>
+  <div style="display: flex">
+    {{a.name}}
+    <ng5-slider [value]="getRelevance(a,b) | async"
+                [options]="getSliderOptions(a,b)"
+                (valueChange)="changeRelevance(a,b,$event)"
+    ></ng5-slider>
+    {{b.name}}
+  </div>
+</ng-template>

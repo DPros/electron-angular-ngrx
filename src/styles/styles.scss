@@ -4,3 +4,7 @@
 @import './bootstrap-4.0.0/scss/bootstrap.scss';
 //@import './custom-styles.css';
 @import '../../node_modules/font-awesome/scss/font-awesome';
+
+button._selected {
+  background-color: #a5a5a0;
+}

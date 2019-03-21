@@ -1,16 +1,12 @@
-import {ChangeDetectionStrategy, Component, OnDestroy, OnInit} from '@angular/core';
+import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {Criteria} from '../../models/criteria';
-import {Subscription} from 'rxjs/internal/Subscription';
-import {FormBuilder, Validators} from '@angular/forms';
-import {AddCriteria} from '../../store/ahm.actions';
+import {FormBuilder} from '@angular/forms';
+import {AddCriteria, ChangeCriterionRelevance} from '../../store/ahm.actions';
 import {AhmStore} from '../../services/ahm-store.service';
-import {ChangeRelevance} from '../../store/criterion-relevance.actions';
-import {SimpleMap} from '../../models/simple-map';
-import {PairwiseRelevance} from '../../models/pairwise-relevance';
-import {distinctUntilChanged, map} from 'rxjs/operators';
+import {RelevanceMap} from '../../models/relevance-map';
 import {Observable} from 'rxjs/internal/Observable';
 import {AhmCalculationUtils} from '../../services/ahm-calculation.utils';
-import {log} from '../../utils/utils';
+import {tap} from 'rxjs/operators';
 
 @Component({
   selector: 'criterion-list',
@@ -18,87 +14,28 @@ import {log} from '../../utils/utils';
   styleUrls: ['./criterion-list.component.less'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class CriterionListComponent implements OnInit, OnDestroy {
+export class CriterionListComponent implements OnInit {
 
   constructor(private ahmStore: AhmStore,
               private formBuilder: FormBuilder,
               private ahmCalculationUtils: AhmCalculationUtils) {
   }
 
-  _criterion: Observable<Criteria[]>;
-  relevances$: Observable<SimpleMap<PairwiseRelevance>>;
-  _criteriaForm = this.formBuilder.group({
-    name: ['', Validators.required]
-  });
-  _selectedCriteria: Criteria[] = [];
-
-  private subscriptions: Subscription;
+  _criterion$: Observable<Criteria[]>;
+  _relevances$: Observable<Record<string, RelevanceMap>>;
+  _scores$: Observable<Record<string, number>>;
 
   ngOnInit() {
-    this._criterion = this.ahmStore.select(({criterion}) => criterion);
-    this.relevances$ = this.ahmStore.select(({criterionRelevance}) => criterionRelevance);
+    this._criterion$ = this.ahmStore.select(({criterion}) => criterion);
+    this._relevances$ = this.ahmStore.select(({criterionRelevance}) => criterionRelevance);
+    this._scores$ = this.ahmCalculationUtils.getCriterionScores$().pipe(tap(_ => console.log(_)));
   }
 
-  select(criteria: Criteria) {
-    const [first, second] = this._selectedCriteria;
-    if (!first) {
-      this._selectedCriteria = [criteria];
-    } else if (!second) {
-      this._selectedCriteria = [first, criteria];
-    } else {
-      this._selectedCriteria = [second, criteria];
-    }
+  changeRelevance([a, b, relevance]: [Criteria, Criteria, number]) {
+    this.ahmStore.dispatch(new ChangeCriterionRelevance(a.name, b.name, relevance));
   }
 
-  deselect(criteria: Criteria) {
-    const [first, second] = this._selectedCriteria;
-    if (second === criteria) {
-      this._selectedCriteria = [first];
-    } else if (second) {
-      this._selectedCriteria = [second];
-    } else {
-      this._selectedCriteria = [];
-    }
+  addCriteria(name: string) {
+    this.ahmStore.dispatch(new AddCriteria(name));
   }
-
-  changeRelevance(a: Criteria, b: Criteria, relevance: number) {
-    if (relevance === 0) {
-      this.ahmStore.dispatch(new ChangeRelevance(b.name, a.name, 1));
-    } else if (relevance < 0) {
-      this.ahmStore.dispatch(new ChangeRelevance(b.name, a.name, -relevance));
-    } else {
-      this.ahmStore.dispatch(new ChangeRelevance(a.name, b.name, relevance));
-    }
-  }
-
-  getRelevance(a: Criteria, b: Criteria): Observable<number> {
-    return this.relevances$.pipe(
-      log('criterion list relevances'),
-      map(relevances => relevances[a.name][b.name](a.name)),
-      log('final relevance'),
-      map((relevance: number) => relevance === 1 ? 0 : relevance < 1 ? -1. / relevance : relevance),
-      distinctUntilChanged()
-    );
-  }
-
-  getTotalRelevance(name: string) {
-    return this.ahmCalculationUtils.getCriteriaTotalRelevance(name);
-  }
-
-  onSubmit() {
-    this.ahmStore.dispatch(new AddCriteria(this._criteriaForm.value.name));
-  }
-
-  getSliderOptions(a: Criteria, b: Criteria) {
-    return {
-      floor: -10,
-      ceil: 10,
-      showTicks: true
-    };
-  }
-
-  ngOnDestroy() {
-    this.subscriptions.unsubscribe();
-  }
-
 }
