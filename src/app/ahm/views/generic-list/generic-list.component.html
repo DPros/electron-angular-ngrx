@@ -1,37 +1,50 @@
-<div style="display: flex">
-  <ng-container *ngFor="let item of (items$ | async)"
-                [ngTemplateOutlet]="itemButton"
-                [ngTemplateOutletContext]="{item: item,selected: _selectedItems}"
-  ></ng-container>
-  <table>
-    <tr *ngFor="let score of (ranking$ | async)">
-      <td>{{score[0]}}</td>
-      <td>{{score[1]}}</td>
+<div style="
+    display: grid;
+    grid-template-areas: 'buttons table' 'sliders table' 'add table';
+    grid-template-columns: 1fr auto;
+    grid-template-rows: auto auto 1fr;
+">
+
+  <div style="grid-area: buttons">
+    <ng-container *ngFor="let item of (items$ | async)"
+                  [ngTemplateOutlet]="itemButton"
+                  [ngTemplateOutletContext]="{item: item,selected: _selectedItems}"
+    ></ng-container>
+  </div>
+
+  <table style="grid-area: table; border-left: 2px solid grey; padding-left: 25px; margin-left: 25px">
+    <tr *ngFor="let score of (ranking$ | async)" style="border-bottom: 1px solid #3d4d5d">
+      <td style="padding: 10px;">{{score[0]}}</td>
+      <td style="padding: 10px">{{score[1].toFixed(3)}}</td>
     </tr>
   </table>
-</div>
 
-<ng-container *ngIf="relevances$"
-              [ngSwitch]="_selectedItems.length"
->
-  <ng-container *ngSwitchCase="2"
-                [ngTemplateOutlet]="relevance"
-                [ngTemplateOutletContext]="{a: _selectedItems[0], b: _selectedItems[1]}"
-  ></ng-container>
-  <ng-container *ngSwitchCase="1">
-    <ng-container *ngFor="let item of (items$ | async)">
-      <ng-container *ngIf="item !== _selectedItems[0]"
-                    [ngTemplateOutlet]="relevance"
-                    [ngTemplateOutletContext]="{a: _selectedItems[0], b: item}"
-      ></ng-container>
+  <div style="grid-area: sliders" *ngIf="relevances$"
+       [ngSwitch]="_selectedItems.length"
+  >
+    <ng-container *ngSwitchCase="2"
+                  [ngTemplateOutlet]="relevance"
+                  [ngTemplateOutletContext]="{a: _selectedItems[0], b: _selectedItems[1]}"
+    ></ng-container>
+    <ng-container *ngSwitchCase="1">
+      <ng-container *ngFor="let item of (items$ | async)">
+        <ng-container *ngIf="item !== _selectedItems[0]"
+                      [ngTemplateOutlet]="relevance"
+                      [ngTemplateOutletContext]="{a: _selectedItems[0], b: item}"
+        ></ng-container>
+      </ng-container>
     </ng-container>
-  </ng-container>
-</ng-container>
+  </div>
 
-<form [formGroup]="_form" (ngSubmit)="onSubmit()">
-  <input placeholder="Name" formControlName="name">
-  <button type="submit">Submit</button>
-</form>
+  <form style="grid-area: add; align-self: start"
+        [formGroup]="_form"
+        (ngSubmit)="onSubmit()"
+  >
+    <input placeholder="Name" formControlName="name">
+    <button type="submit">Submit</button>
+  </form>
+
+</div>
 
 <ng-template #itemButton
              let-item="item"
@@ -49,11 +62,18 @@
              let-b="b"
 >
   <div style="display: flex">
-    {{a.name}}
-    <ng5-slider [value]="getRelevance(a,b) | async"
-                [options]="getSliderOptions(a,b)"
-                (valueChange)="changeRelevance(a,b,$event)"
-    ></ng5-slider>
-    {{b.name}}
+    <div style="width: 10%; min-width: 100px; padding-right: 10px; word-wrap: break-word; text-align: left">
+      {{a.name}}
+    </div>
+    <div style="flex: auto;">
+      <ng5-slider [value]="getRelevance(a,b) | async"
+                  [options]="getSliderOptions(a,b)"
+                  [manualRefresh]="_refreshSlider"
+                  (valueChange)="changeRelevance(a,b,$event)"
+      ></ng5-slider>
+    </div>
+    <div style="width: 10%; min-width: 100px;padding-left: 10px; word-wrap: break-word;">
+      {{b.name}}
+    </div>
   </div>
 </ng-template>

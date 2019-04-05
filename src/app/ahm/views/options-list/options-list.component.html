@@ -1,6 +1,6 @@
 <button *ngFor="let criteria of _criterion$ | async"
         [class._selected]="criteria === _selectedCriteria"
-        (click)="onCriteriaClick(criteria)"
+        (click)="onCriteriaClick(criteria === _selectedCriteria ? criteria : null)"
 >
   {{criteria.name}}
 </button>

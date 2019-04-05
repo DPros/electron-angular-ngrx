@@ -8,5 +8,5 @@ import { Component, Input} from '@angular/core';
 export class ToolbarComponent {
 
 
-  @Input() title = 'Electron-Angular-NGRX';
+  @Input() title = 'AHP Calculator';
 }

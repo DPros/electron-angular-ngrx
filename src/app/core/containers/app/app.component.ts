@@ -19,10 +19,6 @@ export class AppComponent {
     {
       label: 'Options',
       routerLink: './options'
-    },
-    {
-      label: 'About',
-      routerLink: './about'
     }
   ];
 

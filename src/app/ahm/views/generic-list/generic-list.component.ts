@@ -1,10 +1,9 @@
-import {ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {AfterContentChecked, ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
 import {Criteria} from '../../models/criteria';
 import {FormBuilder, Validators} from '@angular/forms';
 import {distinctUntilChanged, map} from 'rxjs/operators';
 import {Observable} from 'rxjs/internal/Observable';
 import {RelevanceMap} from '../../models/relevance-map';
-import {Options} from 'ng5-slider';
 
 @Component({
   selector: 'generic-list',
@@ -12,7 +11,7 @@ import {Options} from 'ng5-slider';
   styleUrls: ['./generic-list.component.less'],
   changeDetection: ChangeDetectionStrategy.OnPush
 })
-export class GenericListComponent implements OnInit {
+export class GenericListComponent implements OnInit, AfterContentChecked {
 
   constructor(private formBuilder: FormBuilder) {
   }
@@ -30,6 +29,7 @@ export class GenericListComponent implements OnInit {
     name: ['', Validators.required]
   });
   _selectedItems: Item[] = [];
+  _refreshSlider = new EventEmitter();
 
   @Output()
   relevanceChange = new EventEmitter<[Item, Item, number]>();
@@ -83,6 +83,7 @@ export class GenericListComponent implements OnInit {
 
   onSubmit() {
     this.addItem.emit(this._form.value.name);
+    this._form.reset();
   }
 
   getSliderOptions(a: Criteria, b: Criteria) {
@@ -95,8 +96,12 @@ export class GenericListComponent implements OnInit {
 
   ngOnInit(): void {
     this.ranking$ = this.scores$.pipe(
-      map(scores => Object.entries(scores).sort(([, a], [, b]) => a - b))
+      map(scores => Object.entries(scores).sort(([, a], [, b]) => b - a))
     );
+  }
+
+  ngAfterContentChecked(): void {
+    this._refreshSlider.emit();
   }
 }
 
