@@ -6,20 +6,20 @@
 ">
 
   <div style="grid-area: buttons">
-    <ng-container *ngFor="let item of (items$ | async)"
+    <ng-container *ngFor="let item of items"
                   [ngTemplateOutlet]="itemButton"
                   [ngTemplateOutletContext]="{item: item,selected: _selectedItems}"
     ></ng-container>
   </div>
 
   <table style="grid-area: table; border-left: 2px solid grey; padding-left: 25px; margin-left: 25px">
-    <tr *ngFor="let score of (ranking$ | async)" style="border-bottom: 1px solid #3d4d5d">
-      <td style="padding: 10px;">{{score[0]}}</td>
-      <td style="padding: 10px">{{score[1].toFixed(3)}}</td>
-    </tr>
+<!--    <tr *ngFor="let score of (ranking$ | async)" style="border-bottom: 1px solid #3d4d5d">-->
+<!--      <td style="padding: 10px;">{{score[0]}}</td>-->
+<!--      <td style="padding: 10px">{{score[1].toFixed(3)}}</td>-->
+<!--    </tr>-->
   </table>
 
-  <div style="grid-area: sliders" *ngIf="relevances$"
+  <div style="grid-area: sliders" *ngIf="relevances"
        [ngSwitch]="_selectedItems.length"
   >
     <ng-container *ngSwitchCase="2"
@@ -27,7 +27,7 @@
                   [ngTemplateOutletContext]="{a: _selectedItems[0], b: _selectedItems[1]}"
     ></ng-container>
     <ng-container *ngSwitchCase="1">
-      <ng-container *ngFor="let item of (items$ | async)">
+      <ng-container *ngFor="let item of items">
         <ng-container *ngIf="item !== _selectedItems[0]"
                       [ngTemplateOutlet]="relevance"
                       [ngTemplateOutletContext]="{a: _selectedItems[0], b: item}"
@@ -66,7 +66,7 @@
       {{a.name}}
     </div>
     <div style="flex: auto;">
-      <ng5-slider [value]="getRelevance(a,b) | async"
+      <ng5-slider [value]="getRelevance(a,b)"
                   [options]="getSliderOptions(a,b)"
                   [manualRefresh]="_refreshSlider"
                   (valueChange)="changeRelevance(a,b,$event)"

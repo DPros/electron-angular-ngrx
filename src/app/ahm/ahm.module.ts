@@ -4,12 +4,12 @@ import {CriterionListComponent} from './views/criterion-list/criterion-list.comp
 import {RouterModule} from '@angular/router';
 import {EffectsModule} from '@ngrx/effects';
 import {StoreModule} from '@ngrx/store';
-import {ahmReducer} from './store/ahm.reducer';
+// import {ahmReducer} from './store/ahm.reducer';
 import {AhmEffects} from './store/ahm.effects';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {BrowserAnimationsModule} from '@angular/platform-browser/animations';
 import {AhmStore} from './services/ahm-store.service';
-import {AhmCalculationUtils} from './services/ahm-calculation.utils';
+// import {AhmCalculationUtils} from './services/ahm-calculation.utils';
 import {Ng5SliderModule} from 'ng5-slider';
 import {GenericListComponent} from './views/generic-list/generic-list.component';
 import {OptionsListComponent} from './views/options-list/options-list.component';
@@ -26,7 +26,7 @@ import {OptionsListComponent} from './views/options-list/options-list.component'
     Ng5SliderModule,
     FormsModule,
     ReactiveFormsModule,
-    StoreModule.forFeature('ahm', ahmReducer),
+    // StoreModule.forFeature('ahm', ahmReducer),
     EffectsModule.forFeature([AhmEffects]),
   ],
   declarations: [
@@ -36,7 +36,7 @@ import {OptionsListComponent} from './views/options-list/options-list.component'
   ],
   providers: [
     AhmStore,
-    AhmCalculationUtils
+    // AhmCalculationUtils
   ]
 })
 export class AhmModule {

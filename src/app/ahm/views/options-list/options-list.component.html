@@ -5,7 +5,7 @@
   {{criteria.name}}
 </button>
 <generic-list [items$]="_options$"
-              [relevances$]="_relevances$"
+              [relevances$]="_relevances"
               [scores$]="_scores$"
               (addItem)="addOption($event)"
               (relevanceChange)="changeRelevance($event)"

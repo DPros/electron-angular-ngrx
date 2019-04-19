@@ -17,13 +17,13 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
   }
 
   @Input()
-  items$: Observable<Item[]>;
+  items: Item[];
   @Input()
-  relevances$: Observable<Record<string, RelevanceMap>>;
+  relevances: Record<string, RelevanceMap>;
   @Input()
-  scores$: Observable<Record<string, number>>;
+  scores: Record<string, number>;
 
-  ranking$: Observable<[string, number][]>;
+  ranking: [string, number][];
 
   _form = this.formBuilder.group({
     name: ['', Validators.required]
@@ -73,12 +73,8 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  getRelevance(a: Criteria, b: Criteria): Observable<number> {
-    return this.relevances$.pipe(
-      map(relevances => relevances[a.name][b.name](a.name)),
-      map((relevance: number) => relevance === 1 ? 0 : relevance < 1 ? -1. / relevance : relevance),
-      distinctUntilChanged()
-    );
+  getRelevance(a: Criteria, b: Criteria): number {
+    return this.relevances[a.name].get(b.name);
   }
 
   onSubmit() {
@@ -95,9 +91,9 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
   }
 
   ngOnInit(): void {
-    this.ranking$ = this.scores$.pipe(
-      map(scores => Object.entries(scores).sort(([, a], [, b]) => b - a))
-    );
+    // this.ranking$ = this.scores$.pipe(
+    //   map(scores => Object.entries(scores).sort(([, a], [, b]) => b - a))
+    // );
   }
 
   ngAfterContentChecked(): void {

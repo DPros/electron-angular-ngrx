@@ -1,6 +1,6 @@
-<generic-list [items$]="_criterion$"
-              [relevances$]="_relevances$"
-              [scores$]="_scores$"
+<generic-list [items]="_state.criterion"
+              [relevances]="_state.criterionRelevance"
+              [scores]="_scores$"
               (relevanceChange)="changeRelevance($event)"
               (addItem)="addCriteria($event)"
 ></generic-list>

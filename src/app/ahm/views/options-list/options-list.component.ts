@@ -1,66 +1,49 @@
 import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
 import {Criteria} from '../../models/criteria';
 import {FormBuilder} from '@angular/forms';
-import {AddOption, ChangeOptionsRelevance} from '../../store/ahm.actions';
 import {AhmStore} from '../../services/ahm-store.service';
 import {RelevanceMap} from '../../models/relevance-map';
-import {first, map, switchMap} from 'rxjs/operators';
 import {Observable} from 'rxjs';
-import {AhmCalculationUtils} from '../../services/ahm-calculation.utils';
+// import {AhmCalculationUtils} from '../../services/ahm-calculation.utils';
 import {Option} from '../../models/option';
-import {BehaviorSubject} from 'rxjs/internal/BehaviorSubject';
+import {AhmState} from "../../store/ahm.state";
 
 @Component({
   selector: 'options-list',
   templateUrl: './options-list.component.html',
-  styleUrls: ['./options-list.component.less'],
-  changeDetection: ChangeDetectionStrategy.OnPush
+  styleUrls: ['./options-list.component.less']
 })
 export class OptionsListComponent implements OnInit {
 
-  constructor(private ahmStore: AhmStore,
-              private formBuilder: FormBuilder,
-              private ahmCalculationUtils: AhmCalculationUtils) {
-  }
-
+  _state: AhmState;
   _options$: Observable<Option[]>;
   _criterion$: Observable<Criteria[]>;
-  _relevances$: Observable<Record<string, RelevanceMap>>;
+  _relevances: Record<string, RelevanceMap>;
   _scores$: Observable<Record<string, number>>;
-  _selectedCriteria = new BehaviorSubject<Criteria>(null);
+  _selectedCriteria: Criteria;
+
+  constructor(private ahmStore: AhmStore,
+              private formBuilder: FormBuilder) {
+  }
 
   ngOnInit() {
-    this._criterion$ = this.ahmStore.select(({criterion}) => criterion);
-    this._options$ = this.ahmStore.select(({options}) => options);
-    this._scores$ = this._selectedCriteria.pipe(
-      switchMap(selectedCriteria => selectedCriteria
-        ? this.ahmCalculationUtils.getOptionByCriteriaScores$(selectedCriteria.name)
-        : this.ahmCalculationUtils.getOptionsScore$()
-      )
-    );
+    this._state = this.ahmStore.ahmState;
   }
 
   changeRelevance([a, b, relevance]: [{ name: string }, { name: string }, number]) {
-    this._selectedCriteria.pipe(
-      first()
-    ).subscribe(selectedCriteria => this.ahmStore.dispatch(new ChangeOptionsRelevance(selectedCriteria.name, a.name, b.name, relevance)));
+    this._state.setOptionsRelevanceByCriteria(this._selectedCriteria.name, a.name, b.name, relevance);
   }
 
   addOption(name: string) {
-    this.ahmStore.dispatch(new AddOption(name));
+    this._state.addOption(name);
   }
 
   onCriteriaClick(criteria: Criteria) {
-    this._selectedCriteria.next(criteria);
+    this._selectedCriteria = criteria;
     if (!criteria) {
-      this._relevances$ = null;
-    } else if (!this._relevances$) {
-      this._relevances$ = this.ahmStore.select(({optionsRelevances}) => optionsRelevances).pipe(
-        switchMap((optionRelevances) => this._selectedCriteria.pipe(
-          map(selectedCriteria => optionRelevances[selectedCriteria.name])
-          )
-        )
-      );
+      this._relevances = null;
+    } else if (!this._relevances) {
+      this._relevances = this._state[this._selectedCriteria.name];
     }
   }
 }
