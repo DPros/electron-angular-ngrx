@@ -1,7 +1,11 @@
 import {PairwiseRelevance} from "./pairwise-relevance";
 
 export class RelevanceMap {
-  constructor(private map: Record<string, PairwiseRelevance> = {}) {
+  constructor(public rank, private map: Record<string, PairwiseRelevance> = {}) {
+  }
+
+  _get(name: string) {
+    return this.map[name];
   }
 
   get(name: string) {

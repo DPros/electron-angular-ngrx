@@ -11,8 +11,12 @@ export class RelevanceGraph {
   }
 
   add(name: string) {
-    const n = new RelevanceMap(collectToObject(Object.keys(this.graph).map(_ => <Tuple>[_, new PairwiseRelevance(_, name)])));
-    Object.values(this.graph).forEach(_ => _.add(name, n[name]));
+    const n = new RelevanceMap(
+      Object.values(this.graph).map(_ => _.rank).reduce((acc, v) => acc + v, 0) / Object.keys(this.graph).length,
+      collectToObject(Object.keys(this.graph).map(_ => <Tuple>[_, new PairwiseRelevance(_, name)]))
+    );
+    Object.entries(this.graph).forEach(([k, v]) => v.add(name, n._get(k)));
+    this.graph[name] = n;
   }
 
   changeRelevance(a: string, b: string, relevance: number) {

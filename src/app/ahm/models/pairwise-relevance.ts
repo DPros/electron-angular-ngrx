@@ -29,11 +29,8 @@ export class PairwiseRelevance {
   }
 
   private guard(name: string) {
-    if (name !== this.name2) {
-      throw new Error(`${name}!==${this.name2}`)
-    }
-    if (name !== this.name1) {
-      throw new Error(`${name}!==${this.name1}`)
+    if (name !== this.name2 && name !== this.name1) {
+      throw new Error(`${name}!==(${this.name1} || ${this.name2})`)
     }
   }
 }

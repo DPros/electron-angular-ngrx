@@ -37,7 +37,7 @@ export class AhmState {
   }
 
   setCriterionRelevance(name1: string, name2: string, relevance: number) {
-
+    this.criterionRelevance.changeRelevance(name1, name2, relevance);
   }
 
   setOptionsRelevanceByCriteria(criteria: string, name1: string, name2: string, relevance: number) {

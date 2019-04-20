@@ -1,6 +1,5 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {Criteria} from '../../models/criteria';
-import {FormBuilder} from '@angular/forms';
 import {AhmStore} from '../../services/ahm-store.service';
 import {RelevanceMap} from '../../models/relevance-map';
 import {Observable} from 'rxjs';
@@ -16,14 +15,13 @@ import {AhmState} from "../../store/ahm.state";
 export class OptionsListComponent implements OnInit {
 
   _state: AhmState;
-  _options$: Observable<Option[]>;
+  _options$: Option[];
   _criterion$: Observable<Criteria[]>;
   _relevances: Record<string, RelevanceMap>;
   _scores$: Observable<Record<string, number>>;
   _selectedCriteria: Criteria;
 
-  constructor(private ahmStore: AhmStore,
-              private formBuilder: FormBuilder) {
+  constructor(private ahmStore: AhmStore) {
   }
 
   ngOnInit() {

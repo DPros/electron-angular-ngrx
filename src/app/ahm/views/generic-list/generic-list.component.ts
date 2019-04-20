@@ -1,9 +1,15 @@
-import {AfterContentChecked, ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
+import {
+  AfterContentChecked,
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import {Criteria} from '../../models/criteria';
 import {FormBuilder, Validators} from '@angular/forms';
-import {distinctUntilChanged, map} from 'rxjs/operators';
-import {Observable} from 'rxjs/internal/Observable';
-import {RelevanceMap} from '../../models/relevance-map';
+import {RelevanceGraph} from "../../models/relevance-graph.model";
 
 @Component({
   selector: 'generic-list',
@@ -13,29 +19,25 @@ import {RelevanceMap} from '../../models/relevance-map';
 })
 export class GenericListComponent implements OnInit, AfterContentChecked {
 
-  constructor(private formBuilder: FormBuilder) {
-  }
-
   @Input()
   items: Item[];
   @Input()
-  relevances: Record<string, RelevanceMap>;
+  relevances: RelevanceGraph;
   @Input()
   scores: Record<string, number>;
-
   ranking: [string, number][];
-
   _form = this.formBuilder.group({
     name: ['', Validators.required]
   });
   _selectedItems: Item[] = [];
   _refreshSlider = new EventEmitter();
-
   @Output()
   relevanceChange = new EventEmitter<[Item, Item, number]>();
-
   @Output()
   addItem = new EventEmitter<string>();
+
+  constructor(private formBuilder: FormBuilder) {
+  }
 
   itemClick(item: Item) {
     this._selectedItems.includes(item) ? this.deselect(item) : this.select(item);
@@ -64,17 +66,18 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
   }
 
   changeRelevance(a: Item, b: Item, relevance: number) {
-    if (relevance === 0) {
-      this.relevanceChange.emit([a, b, 1]);
-    } else if (relevance < 0) {
-      this.relevanceChange.emit([b, a, -relevance]);
-    } else {
+    // if (relevance === 0) {
+    //   this.relevanceChange.emit([a, b, 1]);
+    // } else if (relevance < 0) {
+    //   this.relevanceChange.emit([b, a, -relevance]);
+    // } else {
       this.relevanceChange.emit([a, b, relevance]);
-    }
+    // }
   }
 
   getRelevance(a: Criteria, b: Criteria): number {
-    return this.relevances[a.name].get(b.name);
+    const v = this.relevances.get(a.name).get(b.name);
+    return v >= 1 ? Math.round(v) : -Math.round(1 / v);
   }
 
   onSubmit() {
@@ -86,7 +89,28 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
     return {
       floor: -10,
       ceil: 10,
-      showTicks: true
+      showTicks: true,
+      stepsArray: [
+        {value: -10, legend: 10},
+        {value: -9, legend: 9},
+        {value: -8, legend: 8},
+        {value: -7, legend: 7},
+        {value: -6, legend: 6},
+        {value: -5, legend: 5},
+        {value: -4, legend: 4},
+        {value: -3, legend: 3},
+        {value: -2, legend: 2},
+        {value: 0, legend: 1},
+        {value: 2, legend: 2},
+        {value: 3, legend: 3},
+        {value: 4, legend: 4},
+        {value: 5, legend: 5},
+        {value: 6, legend: 6},
+        {value: 7, legend: 7},
+        {value: 8, legend: 8},
+        {value: 9, legend: 9},
+        {value: 10, legend: 10},
+      ]
     };
   }
 
