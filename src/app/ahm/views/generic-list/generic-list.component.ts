@@ -1,9 +1,15 @@
-import {AfterContentChecked, ChangeDetectionStrategy, Component, EventEmitter, Input, OnInit, Output} from '@angular/core';
-import {Criteria} from '../../models/criteria';
+import {
+  AfterContentChecked,
+  ChangeDetectionStrategy,
+  Component,
+  EventEmitter,
+  Input,
+  OnInit,
+  Output
+} from '@angular/core';
 import {FormBuilder, Validators} from '@angular/forms';
 import {distinctUntilChanged, map} from 'rxjs/operators';
 import {Observable} from 'rxjs/internal/Observable';
-import {RelevanceMap} from '../../models/relevance-map';
 
 @Component({
   selector: 'generic-list',
@@ -13,48 +19,46 @@ import {RelevanceMap} from '../../models/relevance-map';
 })
 export class GenericListComponent implements OnInit, AfterContentChecked {
 
-  constructor(private formBuilder: FormBuilder) {
-  }
-
+  @Input()
+  itemsTitle: string;
   @Input()
   items$: Observable<Item[]>;
   @Input()
-  relevances$: Observable<Record<string, RelevanceMap>>;
+  ranks$: Observable<Record<string, number>>;
   @Input()
   scores$: Observable<Record<string, number>>;
-
   ranking$: Observable<[string, number][]>;
-
   _form = this.formBuilder.group({
     name: ['', Validators.required]
   });
-  _selectedItems: Item[] = [];
+  _selectedItems: string[] = [];
   _refreshSlider = new EventEmitter();
-
   @Output()
-  relevanceChange = new EventEmitter<[Item, Item, number]>();
-
+  relevanceChange = new EventEmitter<[string, string, number, string | undefined]>();
   @Output()
   addItem = new EventEmitter<string>();
 
-  itemClick(item: Item) {
-    this._selectedItems.includes(item) ? this.deselect(item) : this.select(item);
+  constructor(private formBuilder: FormBuilder) {
   }
 
-  select(item: Item) {
+  itemClick(name: string) {
+    this._selectedItems.includes(name) ? this.deselect(name) : this.select(name);
+  }
+
+  select(name: string) {
     const [first, second] = this._selectedItems;
     if (!first) {
-      this._selectedItems = [item];
+      this._selectedItems = [name];
     } else if (!second) {
-      this._selectedItems = [first, item];
+      this._selectedItems = [first, name];
     } else {
-      this._selectedItems = [second, item];
+      this._selectedItems = [second, name];
     }
   }
 
-  deselect(criteria: Criteria) {
+  deselect(name: string) {
     const [first, second] = this._selectedItems;
-    if (second === criteria) {
+    if (second === name) {
       this._selectedItems = [first];
     } else if (second) {
       this._selectedItems = [second];
@@ -63,20 +67,25 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
     }
   }
 
-  changeRelevance(a: Item, b: Item, relevance: number) {
-    if (relevance === 0) {
-      this.relevanceChange.emit([a, b, 1]);
-    } else if (relevance < 0) {
-      this.relevanceChange.emit([b, a, -relevance]);
+  changeRelevance(a: string, b: string, relevance: number) {
+    // if (relevance === 0) {
+    //   this.relevanceChange.emit([a, b, 1]);
+    // } else if (relevance < 0) {
+    //   this.relevanceChange.emit([b, a, -relevance]);
+    // } else {
+    const anchor = this._selectedItems.length === 1 ? this._selectedItems[0] : undefined;
+    if (!anchor || anchor === a) {
+      this.relevanceChange.emit([a, b, relevance, anchor])
     } else {
-      this.relevanceChange.emit([a, b, relevance]);
+      this.relevanceChange.emit([b, a, 1 / relevance, anchor]);
     }
+    // }
   }
 
-  getRelevance(a: Criteria, b: Criteria): Observable<number> {
-    return this.relevances$.pipe(
-      map(relevances => relevances[a.name][b.name](a.name)),
-      map((relevance: number) => relevance === 1 ? 0 : relevance < 1 ? -1. / relevance : relevance),
+  getRelevance(a: string, b: string): Observable<number> {
+    return this.ranks$.pipe(
+      map(ranks => ranks[b] / ranks[a]),
+      map((relevance: number) => (relevance >= .67 ? Math.round(relevance) : -Math.round(1 / relevance)) || 1),
       distinctUntilChanged()
     );
   }
@@ -86,18 +95,39 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
     this._form.reset();
   }
 
-  getSliderOptions(a: Criteria, b: Criteria) {
+  getSliderOptions(a: Item, b: Item) {
     return {
       floor: -10,
       ceil: 10,
-      showTicks: true
+      showTicks: true,
+      stepsArray: [
+        {value: -10, legend: 10},
+        {value: -9, legend: 9},
+        {value: -8, legend: 8},
+        {value: -7, legend: 7},
+        {value: -6, legend: 6},
+        {value: -5, legend: 5},
+        {value: -4, legend: 4},
+        {value: -3, legend: 3},
+        {value: -2, legend: 2},
+        {value: 0, legend: 1},
+        {value: 2, legend: 2},
+        {value: 3, legend: 3},
+        {value: 4, legend: 4},
+        {value: 5, legend: 5},
+        {value: 6, legend: 6},
+        {value: 7, legend: 7},
+        {value: 8, legend: 8},
+        {value: 9, legend: 9},
+        {value: 10, legend: 10},
+      ]
     };
   }
 
   ngOnInit(): void {
-    this.ranking$ = this.scores$.pipe(
-      map(scores => Object.entries(scores).sort(([, a], [, b]) => b - a))
-    );
+    // this.ranking$ = this.scores$.pipe(
+    //   map(scores => Object.entries(scores).sort(([, a], [, b]) => b - a))
+    // );
   }
 
   ngAfterContentChecked(): void {

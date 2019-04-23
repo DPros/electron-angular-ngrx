@@ -1,6 +1,7 @@
 <generic-list [items$]="_criterion$"
-              [relevances$]="_relevances$"
+              [ranks$]="_ranks$"
               [scores$]="_scores$"
+              [itemsTitle]="'Criterion'"
               (relevanceChange)="changeRelevance($event)"
               (addItem)="addCriteria($event)"
 ></generic-list>

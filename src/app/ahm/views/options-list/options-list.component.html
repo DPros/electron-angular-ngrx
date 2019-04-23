@@ -1,12 +1,24 @@
-<button *ngFor="let criteria of _criterion$ | async"
-        [class._selected]="criteria === _selectedCriteria"
-        (click)="onCriteriaClick(criteria === _selectedCriteria ? criteria : null)"
->
-  {{criteria.name}}
-</button>
+<b>Criterion:</b>
+<ng-container *ngIf="_selectedCriteria | async as selectedCriteria else noSelectedCriteria">
+  <button *ngFor="let criteria of _criterion$ | async"
+          [class._selected]="criteria.name === selectedCriteria"
+          (click)="onCriteriaClick(criteria.name === selectedCriteria ? null : criteria.name)"
+  >
+    {{criteria.name}}
+  </button>
+</ng-container>
 <generic-list [items$]="_options$"
-              [relevances$]="_relevances$"
+              [ranks$]="_ranks$"
               [scores$]="_scores$"
+              [itemsTitle]="'Options'"
               (addItem)="addOption($event)"
               (relevanceChange)="changeRelevance($event)"
 ></generic-list>
+
+<ng-template #noSelectedCriteria>
+  <button *ngFor="let criteria of _criterion$ | async"
+          (click)="onCriteriaClick(criteria.name)"
+  >
+    {{criteria.name}}
+  </button>
+</ng-template>

@@ -1,4 +1,5 @@
 export interface Option {
   name: string;
-  properties: Record<string, string>;
+  rank: Record<string, number>
+  // properties: Record<string, string>;
 }

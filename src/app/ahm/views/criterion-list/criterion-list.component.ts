@@ -1,12 +1,12 @@
 import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
-import {Criteria} from '../../models/criteria';
 import {FormBuilder} from '@angular/forms';
 import {AddCriteria, ChangeCriterionRelevance} from '../../store/ahm.actions';
 import {AhmStore} from '../../services/ahm-store.service';
-import {RelevanceMap} from '../../models/relevance-map';
 import {Observable} from 'rxjs/internal/Observable';
 import {AhmCalculationUtils} from '../../services/ahm-calculation.utils';
-import {tap} from 'rxjs/operators';
+import {map} from 'rxjs/operators';
+import {collectToObject, Tuple} from "../../utils/utils";
+import {Criteria} from "../../models/criteria";
 
 @Component({
   selector: 'criterion-list',
@@ -16,23 +16,30 @@ import {tap} from 'rxjs/operators';
 })
 export class CriterionListComponent implements OnInit {
 
+  _criterion$: Observable<Criteria[]>;
+  _ranks$: Observable<Record<string, number>>;
+  _scores$: Observable<Record<string, number>>;
+
   constructor(private ahmStore: AhmStore,
               private formBuilder: FormBuilder,
               private ahmCalculationUtils: AhmCalculationUtils) {
   }
 
-  _criterion$: Observable<Criteria[]>;
-  _relevances$: Observable<Record<string, RelevanceMap>>;
-  _scores$: Observable<Record<string, number>>;
-
   ngOnInit() {
-    this._criterion$ = this.ahmStore.select(({criterion}) => criterion);
-    this._relevances$ = this.ahmStore.select(({criterionRelevance}) => criterionRelevance);
-    this._scores$ = this.ahmCalculationUtils.getCriterionScores$().pipe(tap(_ => console.log(_)));
+    this._criterion$ = this.ahmStore.select(({criterion}) => criterion).pipe(
+      map(Object.values)
+    );
+    this._ranks$ = this._criterion$.pipe(
+      map(_ => {
+        console.log(_);
+        return collectToObject(_.map(_ => <Tuple>[_.name, _.rank]))
+      })
+    );
+    // this._scores$ = this.ahmCalculationUtils.getCriterionScores$().pipe(tap(_ => console.log(_)));
   }
 
-  changeRelevance([a, b, relevance]: [Criteria, Criteria, number]) {
-    this.ahmStore.dispatch(new ChangeCriterionRelevance(a.name, b.name, relevance));
+  changeRelevance([a, b, relevance, anchor]: [string, string, number, string | undefined]) {
+    this.ahmStore.dispatch(new ChangeCriterionRelevance(a, b, relevance, anchor));
   }
 
   addCriteria(name: string) {

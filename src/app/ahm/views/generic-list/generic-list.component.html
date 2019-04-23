@@ -4,22 +4,22 @@
     grid-template-columns: 1fr auto;
     grid-template-rows: auto auto 1fr;
 ">
-
   <div style="grid-area: buttons">
+    <b>{{itemsTitle}}:</b>
     <ng-container *ngFor="let item of (items$ | async)"
                   [ngTemplateOutlet]="itemButton"
-                  [ngTemplateOutletContext]="{item: item,selected: _selectedItems}"
+                  [ngTemplateOutletContext]="{name: item.name}"
     ></ng-container>
   </div>
 
   <table style="grid-area: table; border-left: 2px solid grey; padding-left: 25px; margin-left: 25px">
-    <tr *ngFor="let score of (ranking$ | async)" style="border-bottom: 1px solid #3d4d5d">
-      <td style="padding: 10px;">{{score[0]}}</td>
-      <td style="padding: 10px">{{score[1].toFixed(3)}}</td>
-    </tr>
+    <!--    <tr *ngFor="let score of (ranking$ | async)" style="border-bottom: 1px solid #3d4d5d">-->
+    <!--      <td style="padding: 10px;">{{score[0]}}</td>-->
+    <!--      <td style="padding: 10px">{{score[1].toFixed(3)}}</td>-->
+    <!--    </tr>-->
   </table>
 
-  <div style="grid-area: sliders" *ngIf="relevances$"
+  <div style="grid-area: sliders" *ngIf="ranks$ | async"
        [ngSwitch]="_selectedItems.length"
   >
     <ng-container *ngSwitchCase="2"
@@ -28,9 +28,9 @@
     ></ng-container>
     <ng-container *ngSwitchCase="1">
       <ng-container *ngFor="let item of (items$ | async)">
-        <ng-container *ngIf="item !== _selectedItems[0]"
+        <ng-container *ngIf="item.name !== _selectedItems[0]"
                       [ngTemplateOutlet]="relevance"
-                      [ngTemplateOutletContext]="{a: _selectedItems[0], b: item}"
+                      [ngTemplateOutletContext]="{a: _selectedItems[0], b: item.name}"
         ></ng-container>
       </ng-container>
     </ng-container>
@@ -47,33 +47,64 @@
 </div>
 
 <ng-template #itemButton
-             let-item="item"
-             let-selected="selected"
+             let-name="name"
 >
-  <button [class._selected]="selected.includes(item)"
-          (click)="itemClick(item)"
+  <button [class._selected]="_selectedItems.includes(name)"
+          (click)="itemClick(name)"
   >
-    {{item.name}}
+    {{name}}
   </button>
 </ng-template>
 
 <ng-template #relevance
              let-a="a"
              let-b="b"
+             let-proportionally="proportionally"
 >
   <div style="display: flex">
     <div style="width: 10%; min-width: 100px; padding-right: 10px; word-wrap: break-word; text-align: left">
-      {{a.name}}
+      {{a}}
     </div>
     <div style="flex: auto;">
-      <ng5-slider [value]="getRelevance(a,b) | async"
-                  [options]="getSliderOptions(a,b)"
-                  [manualRefresh]="_refreshSlider"
-                  (valueChange)="changeRelevance(a,b,$event)"
-      ></ng5-slider>
+      <ng-container [ngTemplateOutlet]="slider"
+                    [ngTemplateOutletContext]="{a: a, b: b, v: getRelevance(a,b) | async, proportionally: proportionally}"
+      ></ng-container>
     </div>
     <div style="width: 10%; min-width: 100px;padding-left: 10px; word-wrap: break-word;">
-      {{b.name}}
+      {{b}}
     </div>
   </div>
 </ng-template>
+
+<ng-template #slider
+             let-a="a"
+             let-b="b"
+             let-v="v"
+>
+  <button (click)="changeRelevance(a,b,10)" [class._selected]="v===-10">10</button>
+  <button (click)="changeRelevance(a,b,9)" [class._selected]="v===-9">9</button>
+  <button (click)="changeRelevance(a,b,8)" [class._selected]="v===-8">8</button>
+  <button (click)="changeRelevance(a,b,7)" [class._selected]="v===-7">7</button>
+  <button (click)="changeRelevance(a,b,6)" [class._selected]="v===-6">6</button>
+  <button (click)="changeRelevance(a,b,5)" [class._selected]="v===-5">5</button>
+  <button (click)="changeRelevance(a,b,4)" [class._selected]="v===-4">4</button>
+  <button (click)="changeRelevance(a,b,3)" [class._selected]="v===-3">3</button>
+  <button (click)="changeRelevance(a,b,2)" [class._selected]="v===-2">2</button>
+  <button (click)="changeRelevance(a,b,1)" [class._selected]="v===1">1</button>
+  <button (click)="changeRelevance(b,a,2)" [class._selected]="v===2">2</button>
+  <button (click)="changeRelevance(b,a,3)" [class._selected]="v===3">3</button>
+  <button (click)="changeRelevance(b,a,4)" [class._selected]="v===4">4</button>
+  <button (click)="changeRelevance(b,a,5)" [class._selected]="v===5">5</button>
+  <button (click)="changeRelevance(b,a,6)" [class._selected]="v===6">6</button>
+  <button (click)="changeRelevance(b,a,7)" [class._selected]="v===7">7</button>
+  <button (click)="changeRelevance(b,a,8)" [class._selected]="v===8">8</button>
+  <button (click)="changeRelevance(b,a,9)" [class._selected]="v===9">9</button>
+  <button (click)="changeRelevance(b,a,10)" [class._selected]="v===10">10</button>
+</ng-template>
+
+
+<!--<ng5-slider [value]="getRelevance(a,b)"-->
+<!--            [options]="getSliderOptions(a,b)"-->
+<!--            [manualRefresh]="_refreshSlider"-->
+<!--            (valueChange)="changeRelevance(a,b,$event)"-->
+<!--&gt;</ng5-slider>-->

@@ -10,8 +10,8 @@ export function log<T>(message: string): MonoTypeOperatorFunction<T> {
   };
 }
 
-export function collectToObject<T>(entries: [string, T][]): Record<string, T> {
-  return entries.reduce((acc, [prop, value]) => (acc[prop] = value, acc), {});
+export function collectToObject<T>(entries: [string, T][], initialValue: Record<string, T> = {}): Record<string, T> {
+  return entries.reduce((acc, [prop, value]) => (acc[prop] = value, acc), initialValue);
 }
 
-export type Tuple = [string, any];
+export type Tuple<T = any> = [string, T];
