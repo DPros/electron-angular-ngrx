@@ -13,7 +13,7 @@ export class AhmStore {
 
   ahmStore: Observable<AhmState>;
 
-  select<Props, K>(selector: (state: AhmState, props: Props) => K): Observable<K> {
+  select$<Props, K>(selector: (state: AhmState, props: Props) => K): Observable<K> {
     return this.ahmStore.pipe(select(selector));
   }
 

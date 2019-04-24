@@ -15,7 +15,7 @@ export class ChangeCriterionRelevance implements Action {
 export class ChangeOptionsRelevance implements Action {
   readonly type = CHANGE_OPTIONS_RELEVANCE;
 
-  constructor(public criteria: string, public name1: string, public name2: string, public relevance: number, public proportionally: boolean) {
+  constructor(public criteria: string, public name1: string, public name2: string, public relevance: number, public anchor: string) {
   }
 }
 

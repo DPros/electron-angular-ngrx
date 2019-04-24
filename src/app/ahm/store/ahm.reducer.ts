@@ -1,7 +1,8 @@
-import {AhmState, initialAhmState} from './ahm.state';
-import {ADD_CRITERIA, ADD_OPTION, AhmAction, CHANGE_CRITERION_RELEVANCE, CHANGE_OPTIONS_RELEVANCE} from './ahm.actions';
-import {collectToObject, Tuple} from "../utils/utils";
-import {Criteria} from "../models/criteria";
+import { AhmState, initialAhmState } from './ahm.state';
+import { ADD_CRITERIA, ADD_OPTION, AhmAction, CHANGE_CRITERION_RELEVANCE, CHANGE_OPTIONS_RELEVANCE } from './ahm.actions';
+import { collectToObject, Tuple } from '../utils/utils';
+import { Criteria } from '../models/criteria';
+import { Option } from '../models/option';
 
 export function ahmReducer(state: AhmState = initialAhmState, action: AhmAction): AhmState {
   switch (action.type) {
@@ -35,69 +36,37 @@ export function ahmReducer(state: AhmState = initialAhmState, action: AhmAction)
       };
 
     case CHANGE_OPTIONS_RELEVANCE:
-      const newRanksByCriteria = (action.proportionally ? calcRanksProportionally : calcRanksRelatively)
-      (action.name1, action.name2, action.relevance,
-        collectToObject(Object.values(state.options).map(_ => <Tuple>[_.name, _.rank[action.criteria]])));
+      let ranksByCriteria;
+      if (action.anchor) {
+        ranksByCriteria = calcRanks(action.anchor, action.name1, action.name2, action.relevance,
+          (option: Option) => option.rank[action.criteria], state.options);
+
+      } else {
+        ranksByCriteria = calcRanksRelatively(action.name1, action.name2, action.relevance, collectToObject(Object.values(state.options)
+          .map(_ => <Tuple>[_.name, _.rank[action.criteria]])));
+      }
       return {
         ...state,
-        options: collectToObject(Object.values(state.options).map(_ => <Tuple>[_.name, {
-          ..._,
-          rank: {
-            ..._.rank,
-            [action.criteria]: newRanksByCriteria[_.name]
-          }
-        }]))
+        options: collectToObject(ranksByCriteria.map(([n, r]) => {
+          const option = state.options[n];
+          return <Tuple<Option>>[n, {...option, rank: {...option.rank, [action.criteria]: r}}];
+        }))
       };
 
     case CHANGE_CRITERION_RELEVANCE:
+      let ranks;
       if (action.anchor) {
-        let newRank: number, newAnchorRank: number;
-        if (action.relevance < 1) {
-          newRank = state.criterion[action.name1].rank / action.relevance;
-          if (newRank > 10) {
-            newAnchorRank = 10 * action.relevance;
-            newRank = 10;
-          } else if (newRank < 1) {
-            newAnchorRank = 1 / action.relevance;
-            newRank = 1;
-          }
-        } else {
-          newRank = state.criterion[action.name1].rank / action.relevance;
-          if (newRank > 10) {
-            newAnchorRank = 10 / action.relevance;
-            newRank = 10;
-          } else if (newRank < 1) {
-            newAnchorRank = action.relevance;
-            newRank = 1;
-          }
-        }
-        const res = Object.values(state.criterion).map(_ => <Tuple<Criteria>>[_.name,
-          _.name === action.name2
-            ? {
-              ..._,
-              rank: newRank
-            }
-            : (_.name === action.anchor && newAnchorRank)
-            ? {
-              ..._,
-              rank: newAnchorRank
-            }
-            : _]);
-        return {
-          ...state,
-          criterion: collectToObject(res)
-        };
+        ranks = calcRanks(action.anchor, action.name1, action.name2, action.relevance,
+          (criteria: Criteria) => criteria.rank, state.criterion);
+
       } else {
-        const newRanks = calcRanksRelatively(action.name1, action.name2, action.relevance, collectToObject(Object.values(state.criterion)
+        ranks = calcRanksRelatively(action.name1, action.name2, action.relevance, collectToObject(Object.values(state.criterion)
           .map(_ => <Tuple>[_.name, _.rank])));
-        return {
-          ...state,
-          criterion: collectToObject(Object.values(state.criterion).map(_ => <Tuple>[_.name, {
-            ..._,
-            rank: newRanks[_.name]
-          }]))
-        }
       }
+      return {
+        ...state,
+        criterion: collectToObject(ranks.map(([n, r]) => <Tuple<Criteria>>[n, {...state.criterion[n], rank: r}]))
+      };
 
     default:
       return state;
@@ -105,13 +74,41 @@ export function ahmReducer(state: AhmState = initialAhmState, action: AhmAction)
 }
 
 function calcAvgRank(ranks: number[]) {
-  return ranks.reduce((acc, v) => acc + v, 0) / ranks.length || 1;
+  return ranks.reduce((acc, v) => acc + v, 0) / ranks.length || 5;
 }
 
-function calcRank(anchor: string, name1: string, name2: string, relevance: number, rankGetter: (name: string) => number) {
-  return anchor === name1
-    ? rankGetter(anchor) / relevance
-    : rankGetter(anchor) * relevance;
+function calcRanks<T extends { name: string }>(anchor: string, name1: string, name2: string, relevance: number,
+                                               getRank: (item: T) => number,
+                                               items: Record<string, Readonly<T>>) {
+  let res: [string, number][];
+  const newRank = getRank(items[name1]) / relevance;
+  if (newRank > 10) {
+    const diff = 10. / newRank;
+    res = Object.values(items).map(_ => <Tuple<number>>[_.name,
+      _.name === name2
+        ? 10
+        : getRank(_) * diff
+    ]);
+    if (!!res.find(([, _]) => _ < 1)) {
+      res = res.map(([n, r]) => <Tuple<number>>[n, n === name2 || n === name1 ? r : 1 + (getRank(items[n]) - 1) * diff]);
+    }
+  } else if (newRank < 1) {
+    const diff = newRank;
+    res = Object.values(items).map(_ => <Tuple<number>>[_.name,
+      _.name === name2
+        ? 1
+        : getRank(_) / diff
+    ]);
+    if (!!res.find(([, _]) => _ > 10)) {
+      res = res.map(([n, r]) => <Tuple<number>>[n, n === name2 || n === name1 ? r : getRank(items[n]) + (10 - getRank(items[n])) * diff]);
+    }
+  } else {
+    res = Object.values(items).map(_ => <Tuple<number>>[_.name,
+      _.name === name2
+        ? newRank
+        : getRank(_)]);
+  }
+  return res;
 }
 
 function calcRanksProportionally(a: string, b: string, relevance: number, ranks: Record<string, number>) {
@@ -135,7 +132,7 @@ function calcRanksProportionally(a: string, b: string, relevance: number, ranks:
     : v <= lowRank
       ? v
       : highNew * v / highRank
-  ]))
+  ]));
 }
 
 function calcRanksRelatively(a: string, b: string, relevance: number, ranks: Record<string, number>) {
@@ -151,15 +148,14 @@ function calcRanksRelatively(a: string, b: string, relevance: number, ranks: Rec
     bNew = 10;
     aNew = 10 / relevance;
   }
-  let res = Object.entries(ranks)
+  // const minRank = Math.min(...res.map(([, _]) => _));
+  // if (minRank > 1) {
+  //   res = res.map(([n, c]) => <Tuple>[n, c / minRank]);
+  // }
+  return collectToObject(Object.entries(ranks)
     .map(([k, v]) => <Tuple>([k, k === b
       ? aNew
       : k === a
         ? bNew
-        : v]));
-  const minRank = Math.min(...res.map(([, _]) => _));
-  if (minRank > 1) {
-    res = res.map(([n, c]) => <Tuple>[n, c / minRank])
-  }
-  return collectToObject(res);
+        : v])));
 }

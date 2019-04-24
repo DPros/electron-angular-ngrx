@@ -2,11 +2,19 @@
 <ng-container *ngIf="_selectedCriteria | async as selectedCriteria else noSelectedCriteria">
   <button *ngFor="let criteria of _criterion$ | async"
           [class._selected]="criteria.name === selectedCriteria"
-          (click)="onCriteriaClick(criteria.name === selectedCriteria ? null : criteria.name)"
+          (click)="onCriteriaClick(criteria.name === selectedCriteria ? undefined : criteria.name)"
   >
     {{criteria.name}}
   </button>
 </ng-container>
+
+<b style="float: right">
+  <ng-container *ngIf="(_selectedCriteria | async) as selectedCriteria else totalRankingLabel">
+    Ranking for {{selectedCriteria}}:
+  </ng-container>
+</b>
+<ng-template #totalRankingLabel> Total Ranking:</ng-template>
+
 <generic-list [items$]="_options$"
               [ranks$]="_ranks$"
               [scores$]="_scores$"

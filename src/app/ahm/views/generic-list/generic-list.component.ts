@@ -125,9 +125,9 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
   }
 
   ngOnInit(): void {
-    // this.ranking$ = this.scores$.pipe(
-    //   map(scores => Object.entries(scores).sort(([, a], [, b]) => b - a))
-    // );
+    this.ranking$ = this.scores$.pipe(
+      map(scores => Object.entries(scores).sort(([, a], [, b]) => b - a))
+    );
   }
 
   ngAfterContentChecked(): void {

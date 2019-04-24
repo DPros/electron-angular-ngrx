@@ -1,12 +1,12 @@
-import {ChangeDetectionStrategy, Component, OnInit} from '@angular/core';
-import {FormBuilder} from '@angular/forms';
-import {AddCriteria, ChangeCriterionRelevance} from '../../store/ahm.actions';
-import {AhmStore} from '../../services/ahm-store.service';
-import {Observable} from 'rxjs/internal/Observable';
-import {AhmCalculationUtils} from '../../services/ahm-calculation.utils';
-import {map} from 'rxjs/operators';
-import {collectToObject, Tuple} from "../../utils/utils";
-import {Criteria} from "../../models/criteria";
+import { ChangeDetectionStrategy, Component, OnInit } from '@angular/core';
+import { FormBuilder } from '@angular/forms';
+import { AddCriteria, ChangeCriterionRelevance } from '../../store/ahm.actions';
+import { AhmStore } from '../../services/ahm-store.service';
+import { Observable } from 'rxjs/internal/Observable';
+import { AhmCalculationUtils } from '../../services/ahm-calculation.utils';
+import { map } from 'rxjs/operators';
+import { collectToObject, Tuple } from '../../utils/utils';
+import { Criteria } from '../../models/criteria';
 
 @Component({
   selector: 'criterion-list',
@@ -26,16 +26,16 @@ export class CriterionListComponent implements OnInit {
   }
 
   ngOnInit() {
-    this._criterion$ = this.ahmStore.select(({criterion}) => criterion).pipe(
+    this._criterion$ = this.ahmStore.select$(({criterion}) => criterion).pipe(
       map(Object.values)
     );
     this._ranks$ = this._criterion$.pipe(
       map(_ => {
         console.log(_);
-        return collectToObject(_.map(_ => <Tuple>[_.name, _.rank]))
+        return collectToObject(_.map(_ => <Tuple>[_.name, _.rank]));
       })
     );
-    // this._scores$ = this.ahmCalculationUtils.getCriterionScores$().pipe(tap(_ => console.log(_)));
+    this._scores$ = this.ahmCalculationUtils.getCriterionScores();
   }
 
   changeRelevance([a, b, relevance, anchor]: [string, string, number, string | undefined]) {

@@ -13,10 +13,10 @@
   </div>
 
   <table style="grid-area: table; border-left: 2px solid grey; padding-left: 25px; margin-left: 25px">
-    <!--    <tr *ngFor="let score of (ranking$ | async)" style="border-bottom: 1px solid #3d4d5d">-->
-    <!--      <td style="padding: 10px;">{{score[0]}}</td>-->
-    <!--      <td style="padding: 10px">{{score[1].toFixed(3)}}</td>-->
-    <!--    </tr>-->
+        <tr *ngFor="let score of (ranking$ | async)" style="border-bottom: 1px solid #3d4d5d">
+          <td style="padding: 10px;">{{score[0]}}</td>
+          <td style="padding: 10px">{{score[1].toFixed(3)}}</td>
+        </tr>
   </table>
 
   <div style="grid-area: sliders" *ngIf="ranks$ | async"
