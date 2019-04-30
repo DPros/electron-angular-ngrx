@@ -81,7 +81,6 @@
              let-b="b"
              let-v="v"
 >
-  <button (click)="changeRelevance(a,b,10)" [class._selected]="v===-10">10</button>
   <button (click)="changeRelevance(a,b,9)" [class._selected]="v===-9">9</button>
   <button (click)="changeRelevance(a,b,8)" [class._selected]="v===-8">8</button>
   <button (click)="changeRelevance(a,b,7)" [class._selected]="v===-7">7</button>
@@ -99,12 +98,4 @@
   <button (click)="changeRelevance(b,a,7)" [class._selected]="v===7">7</button>
   <button (click)="changeRelevance(b,a,8)" [class._selected]="v===8">8</button>
   <button (click)="changeRelevance(b,a,9)" [class._selected]="v===9">9</button>
-  <button (click)="changeRelevance(b,a,10)" [class._selected]="v===10">10</button>
 </ng-template>
-
-
-<!--<ng5-slider [value]="getRelevance(a,b)"-->
-<!--            [options]="getSliderOptions(a,b)"-->
-<!--            [manualRefresh]="_refreshSlider"-->
-<!--            (valueChange)="changeRelevance(a,b,$event)"-->
-<!--&gt;</ng5-slider>-->

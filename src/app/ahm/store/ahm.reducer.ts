@@ -82,11 +82,11 @@ function calcRanks<T extends { name: string }>(anchor: string, name1: string, na
                                                items: Record<string, Readonly<T>>) {
   let res: [string, number][];
   const newRank = getRank(items[name1]) / relevance;
-  if (newRank > 10) {
-    const diff = 10. / newRank;
+  if (newRank > 9) {
+    const diff = 9. / newRank;
     res = Object.values(items).map(_ => <Tuple<number>>[_.name,
       _.name === name2
-        ? 10
+        ? 9
         : getRank(_) * diff
     ]);
     if (!!res.find(([, _]) => _ < 1)) {
@@ -99,8 +99,8 @@ function calcRanks<T extends { name: string }>(anchor: string, name1: string, na
         ? 1
         : getRank(_) / diff
     ]);
-    if (!!res.find(([, _]) => _ > 10)) {
-      res = res.map(([n, r]) => <Tuple<number>>[n, n === name2 || n === name1 ? r : getRank(items[n]) + (10 - getRank(items[n])) * diff]);
+    if (!!res.find(([, _]) => _ > 9)) {
+      res = res.map(([n, r]) => <Tuple<number>>[n, n === name2 || n === name1 ? r : getRank(items[n]) + (9 - getRank(items[n])) * diff]);
     }
   } else {
     res = Object.values(items).map(_ => <Tuple<number>>[_.name,
@@ -138,24 +138,20 @@ function calcRanksProportionally(a: string, b: string, relevance: number, ranks:
 function calcRanksRelatively(a: string, b: string, relevance: number, ranks: Record<string, number>) {
   const aOld = ranks[a];
   const bOld = ranks[b];
-  const oldCenter = (aOld + bOld) / 2;
-  let aNew = 2 * oldCenter / (relevance + 1);
+  const x = Math.sqrt(relevance * bOld / aOld);
+  let aNew = aOld * x;
   if (aNew < 1) {
     aNew = 1;
   }
-  let bNew = aNew * relevance;
-  if (bNew > 10) {
-    bNew = 10;
-    aNew = 10 / relevance;
+  let bNew = bOld / x;
+  if (bNew > 9) {
+    bNew = 9;
+    aNew = 9 / relevance;
   }
-  // const minRank = Math.min(...res.map(([, _]) => _));
-  // if (minRank > 1) {
-  //   res = res.map(([n, c]) => <Tuple>[n, c / minRank]);
-  // }
-  return collectToObject(Object.entries(ranks)
+  return Object.entries(ranks)
     .map(([k, v]) => <Tuple>([k, k === b
-      ? aNew
+      ? bNew
       : k === a
-        ? bNew
-        : v])));
+        ? aNew
+        : v]));
 }

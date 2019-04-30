@@ -75,7 +75,7 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
     // } else {
     const anchor = this._selectedItems.length === 1 ? this._selectedItems[0] : undefined;
     if (!anchor || anchor === a) {
-      this.relevanceChange.emit([a, b, relevance, anchor])
+      this.relevanceChange.emit([a, b, relevance, anchor]);
     } else {
       this.relevanceChange.emit([b, a, 1 / relevance, anchor]);
     }
@@ -97,11 +97,10 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
 
   getSliderOptions(a: Item, b: Item) {
     return {
-      floor: -10,
-      ceil: 10,
+      floor: -9,
+      ceil: 9,
       showTicks: true,
       stepsArray: [
-        {value: -10, legend: 10},
         {value: -9, legend: 9},
         {value: -8, legend: 8},
         {value: -7, legend: 7},
@@ -119,7 +118,6 @@ export class GenericListComponent implements OnInit, AfterContentChecked {
         {value: 7, legend: 7},
         {value: 8, legend: 8},
         {value: 9, legend: 9},
-        {value: 10, legend: 10},
       ]
     };
   }
