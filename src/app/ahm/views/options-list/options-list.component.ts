@@ -38,7 +38,7 @@ export class OptionsListComponent implements OnInit {
     );
     this._scores$ = this._selectedCriteria.pipe(
       switchMap(selectedCriteria => selectedCriteria
-        ? this.ahmCalculationUtils.getOptionsScoresByCriteria(selectedCriteria)
+        ? this.ahmCalculationUtils.getOptionsScoresByCriteria$(selectedCriteria)
         : this.ahmCalculationUtils.getOptionsScores()
       )
     );
