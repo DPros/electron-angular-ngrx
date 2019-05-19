@@ -1,6 +1,6 @@
 import { Injectable } from '@angular/core';
 import { AhmStore } from './ahm-store.service';
-import { map, switchMap } from 'rxjs/operators';
+import {filter, map, switchMap} from 'rxjs/operators';
 import { Observable } from 'rxjs';
 import { collectToObject, Tuple } from '../utils/utils';
 import { Option } from '../models/option';
@@ -40,6 +40,7 @@ export class AhmCalculationUtils {
         }
         return scores[0];
       }),
+      filter(_ => Boolean(_)),
       map(_ => collectToObject(_))
     );
   }
@@ -48,12 +49,6 @@ export class AhmCalculationUtils {
     return this.criterionToRanksTuples$().pipe(
       map(_ => _.map(([name]) => <Tuple<number>>[name, this.calcItemScore(name, _)])),
       map(_ => collectToObject(_))
-    );
-  }
-
-  public getCriteriaScore(name: string): Observable<number> {
-    return this.criterionToRanksTuples$().pipe(
-      map(_ => this.calcItemScore(name, _))
     );
   }
 
@@ -67,13 +62,4 @@ export class AhmCalculationUtils {
   private calcItemScore(name: string, ranks: [string, number][]) {
     return ranks.find(([n]) => n === name)[1] / ranks.reduce((acc, [, r]) => acc + r, 0);
   }
-
-// getCriteriaScore(criteriaName: string): Observable<number> {
-//   return this.criterionScores$.pipe(
-//     log('criteria relevance sums'),
-//     map(([criterionRelevanceMap, sums]: [Record<string, RelevanceMap>, Record<string, number>]) =>
-//       this.doGetItemsScores(criteriaName, criterionRelevanceMap[criteriaName], sums)
-//     )
-//   );
-// }
 }

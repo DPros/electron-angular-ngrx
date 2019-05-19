@@ -1,10 +1,21 @@
 /* You can add global styles to this file, and also import other style files */
-@import '~styles/mixins';
-@import '~styles/variables';
+@import './mixins';
+@import './variables';
 @import './bootstrap-4.0.0/scss/bootstrap.scss';
-//@import './custom-styles.css';
 @import '../../node_modules/font-awesome/scss/font-awesome';
 
 button._selected {
   background-color: #a5a5a0;
 }
+
+.buttons-title {
+  width: 80px;
+  display: inline-block;
+}
+
+.item-button {
+  & + & {
+    margin-left: 5px;
+  }
+}
+

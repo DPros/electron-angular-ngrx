@@ -1,6 +1,7 @@
-<b>Criterion:</b>
+<b class="buttons-title">Criterion:</b>
 <ng-container *ngIf="_selectedCriteria | async as selectedCriteria else noSelectedCriteria">
   <button *ngFor="let criteria of _criterion$ | async"
+          class="item-button"
           [class._selected]="criteria.name === selectedCriteria"
           (click)="onCriteriaClick(criteria.name === selectedCriteria ? undefined : criteria.name)"
   >
@@ -25,6 +26,7 @@
 
 <ng-template #noSelectedCriteria>
   <button *ngFor="let criteria of _criterion$ | async"
+          class="item-button"
           (click)="onCriteriaClick(criteria.name)"
   >
     {{criteria.name}}

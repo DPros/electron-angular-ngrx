@@ -111,30 +111,6 @@ function calcRanks<T extends { name: string }>(anchor: string, name1: string, na
   return res;
 }
 
-function calcRanksProportionally(a: string, b: string, relevance: number, ranks: Record<string, number>) {
-  const aOld = ranks[a];
-  const bOld = ranks[b];
-  let high: string, low: string, highRank: number, lowRank: number;
-  if (aOld < bOld) {
-    low = a;
-    high = b;
-    lowRank = aOld;
-    highRank = bOld;
-  } else {
-    low = b;
-    high = a;
-    lowRank = bOld;
-    highRank = aOld;
-  }
-  const highNew = relevance / lowRank;
-  return collectToObject(Object.entries(ranks).map(([k, v]) => <Tuple<number>>[k, k === high
-    ? highNew
-    : v <= lowRank
-      ? v
-      : highNew * v / highRank
-  ]));
-}
-
 function calcRanksRelatively(a: string, b: string, relevance: number, ranks: Record<string, number>) {
   const aOld = ranks[a];
   const bOld = ranks[b];
